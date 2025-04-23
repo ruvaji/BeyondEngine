@@ -1,6 +1,7 @@
 package net.beyondDev.beyondengine;
 
 import com.mojang.logging.LogUtils;
+import net.beyondDev.beyondengine.entity.ModEntities;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.food.FoodProperties;
@@ -48,6 +49,7 @@ public class Beyondengine {
         modEventBus.addListener(this::AddCreative);
 
         LanguageAdapter.registerMod("beyondengine");
+        ModEntities.register(modEventBus);
 
     }
 
