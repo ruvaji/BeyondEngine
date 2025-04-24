@@ -68,12 +68,3 @@ mandatory=true
 versionRange="[20.1.50,)"
 ordering="NONE"
 side="BOTH"
-
-# Here's another dependency
-[[dependencies.beyondengine]]
-    modId = "minecraft"
-    mandatory = true
-    # This version range declares a minimum of the current minecraft version up to but not including the next major version
-    versionRange = "${minecraft_version_range}"
-    ordering = "NONE"
-    side = "BOTH"
