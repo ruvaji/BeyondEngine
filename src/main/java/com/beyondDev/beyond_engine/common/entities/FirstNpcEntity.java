@@ -1,7 +1,9 @@
-package net.beyondDev.beyondengine.entity.custom;
+package com.beyondDev.beyond_engine.common.entities;
 
-import net.beyondDev.beyondengine.entity.ModEntities;
-import net.beyondDev.beyondengine.init.ModAnimations;
+import com.beyondDev.beyond_engine.core.registry.BEEntities;
+import com.beyondDev.beyond_engine.core.registry.BEItems;
+import com.beyondDev.beyond_engine.core.init.BEAnimations;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
@@ -26,7 +28,6 @@ import org.zeith.hammeranims.api.animsys.layer.AnimationLayer;
 import org.zeith.hammeranims.api.tile.IAnimatedEntity;
 
 @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD)
-
 public class FirstNpcEntity extends PathfinderMob implements IAnimatedEntity {
     protected final AnimationSystem animations = AnimationSystem.create(this);
 
@@ -37,7 +38,7 @@ public class FirstNpcEntity extends PathfinderMob implements IAnimatedEntity {
     protected void registerGoals() {
         this.goalSelector.addGoal(0, new FloatGoal(this));
         this.goalSelector.addGoal(1, new PanicGoal(this, (double) 1.25F));
-        this.goalSelector.addGoal(4, new TemptGoal(this, 1.2, Ingredient.of(new ItemLike[]{Items.REDSTONE}), false));
+        this.goalSelector.addGoal(4, new TemptGoal(this, 1.2, Ingredient.of(new ItemLike[]{BEItems.NPC_WAND.get()}), false));
         this.goalSelector.addGoal(6, new WaterAvoidingRandomStrollGoal(this, (double) 1.0F));
         this.goalSelector.addGoal(7, new LookAtPlayerGoal(this, Player.class, 6.0F));
         this.goalSelector.addGoal(8, new RandomLookAroundGoal(this));
@@ -49,7 +50,7 @@ public class FirstNpcEntity extends PathfinderMob implements IAnimatedEntity {
         if (!this.level().isClientSide) {
             this.setCustomNameVisible(false);
             this.setCustomName(Component.literal("§4ПЕРВЫЙ НПС!"));
-            this.animations.startAnimationAt("ambient", ModAnimations.FIRST_NPC_IDLE);
+            this.animations.startAnimationAt("ambient", BEAnimations.FIRST_NPC_IDLE);
             Vec3 pos = this.position();
             double moved = Math.sqrt(pos.distanceToSqr(this.xo, this.yo, this.zo));
             boolean posChanged = Math.abs(pos.x - this.xo) >= (double) 0.00390625F || Math.abs(pos.z - this.zo) >= (double) 0.00390625F;
@@ -58,7 +59,7 @@ public class FirstNpcEntity extends PathfinderMob implements IAnimatedEntity {
             }
 
             if (moved > (double) 0.0F) {
-                this.animations.startAnimationAt("legs", ModAnimations.FIRST_NPC_WALK);
+                this.animations.startAnimationAt("legs", BEAnimations.FIRST_NPC_WALK);
             } else {
                 this.animations.stopAnimation("legs", 0.4F);
             }
@@ -69,12 +70,17 @@ public class FirstNpcEntity extends PathfinderMob implements IAnimatedEntity {
     protected InteractionResult mobInteract(Player pPlayer, InteractionHand pHand) {
         ItemStack itemStack = pPlayer.getItemInHand(pHand);
         if (itemStack.is(Items.STICK)) {
-            this.animations.startAnimationAt("hands", ModAnimations.FIRST_NPC_HELLO);
+            this.animations.startAnimationAt("hands", BEAnimations.FIRST_NPC_HELLO);
         } else {
             this.animations.stopAnimation("hands", 3F);
         }
+
+        if (Screen.hasAltDown()) {
+            moveEntity(pPlayer.getX(), pPlayer.getY(), pPlayer.getZ(), 1f);
+        }
         return super.mobInteract(pPlayer, pHand);
     }
+
 
     public void setupSystem(AnimationSystem.Builder builder) {
         builder.autoSync().addLayers(new AnimationLayer.Builder[]{new AnimationLayer.Builder("ambient"), new AnimationLayer.Builder("legs"), new AnimationLayer.Builder("hands")});
@@ -94,9 +100,13 @@ public class FirstNpcEntity extends PathfinderMob implements IAnimatedEntity {
         super.readAdditionalSaveData(pCompound);
     }
 
+
     @SubscribeEvent
     public static void attributes(EntityAttributeCreationEvent e) {
-        e.put(ModEntities.FIRST_NPC.get(), Mob.createMobAttributes().add(Attributes.MAX_HEALTH, (float) 20D)
-                .add(Attributes.MOVEMENT_SPEED, (double) 0.3f).build());
+        e.put(BEEntities.FIRST_NPC.get(), Mob.createMobAttributes().add(Attributes.MAX_HEALTH, (float) 20D).add(Attributes.MOVEMENT_SPEED, (double) 0.3f).build());
+    }
+
+    public void moveEntity(double x, double y, double z, float speed) {
+        this.getNavigation().moveTo(x, y, z, speed);
     }
 }
